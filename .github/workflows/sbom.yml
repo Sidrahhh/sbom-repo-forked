@@ -1,0 +1,39 @@
+name: Generate SBOM on PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+jobs:
+  generate-sbom:
+    runs-on: ubuntu-latest
+    name: Generate SBOM (Syft)
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node (for npm projects; remove for other ecosystems)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies (npm ci)
+        if: always()
+        run: |
+          # Only do this if your project has a lockfile and requires install:
+          if [ -f package-lock.json ]; then npm ci; elif [ -f package.json ]; then npm install --no-audit --no-fund; fi
+
+      - name: Generate SBOM and upload artifact (Anchore sbom-action)
+        uses: anchore/sbom-action@v0
+        with:
+          # Choose format: spdx-json, cyclonedx-json, syft-json, etc.
+          format: cyclonedx-json
+          # target defaults to workspace; you can set TARGET to a path or image
+          # target: .
