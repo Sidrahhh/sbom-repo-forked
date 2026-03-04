@@ -1,18 +1,18 @@
 def cvss_to_severity(score: float, thresholds: dict = None) -> str:
     """
     Convert CVSS score to severity level.
-    
+
     Args:
         score: CVSS score (0.0 - 10.0)
         thresholds: Optional dict with custom thresholds
                    e.g., {"critical": 9.0, "high": 7.0, "medium": 4.0}
-    
+
     Returns:
         Severity string: CRITICAL, HIGH, MEDIUM, LOW, or UNKNOWN
     """
     if score is None or score == 0.0:
         return "UNKNOWN"
-    
+
     # Use custom thresholds if provided, otherwise use CVSS v3.1 standard
     if thresholds is None:
         thresholds = {
@@ -20,7 +20,7 @@ def cvss_to_severity(score: float, thresholds: dict = None) -> str:
             "high": 7.0,
             "medium": 4.0
         }
-    
+
     if score >= thresholds.get("critical", 9.0):
         return "CRITICAL"
     elif score >= thresholds.get("high", 7.0):

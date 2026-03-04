@@ -18,12 +18,33 @@ policy_gates:
   fail_on:
     - CRITICAL
     - HIGH
-  
+
   # Warn but allow merge for these severity levels
   warn_on:
     - MEDIUM
-  
+
   # Allow these severity levels
   allow:
     - LOW
     - UNKNOWN
+  
+  # NEW: Only fail on reachable vulnerabilities (ignore unreachable ones)
+  fail_on_reachable_only: false
+
+# Advanced Conditional Rules (evaluated first, in order)
+# These rules support complex logic with reachability analysis
+rules:
+  # Rule 1: Block critical AND reachable vulnerabilities
+  - type: deny
+    when: severity == "CRITICAL" and reachable == true
+    msg: "Critical & reachable → Block"
+
+  # Rule 2: Allow high severity if not reachable
+  - type: allow
+    when: severity == "HIGH" and reachable == false
+    msg: "High but not reachable → Allow with warning"
+
+  # Rule 3: Warn on medium/low severity
+  - type: warn
+    when: severity in ["LOW", "MEDIUM"]
+    msg: "Low/Medium → Allow with warning"

@@ -1,0 +1,27 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "version": 1,
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/lodash@4.17.20",
+      "name": "lodash",
+      "version": "4.17.20",
+      "scope": "required"
+    },
+    {
+      "type": "library",
+      "purl": "pkg:npm/webpack@4.0.0",
+      "name": "webpack",
+      "version": "4.0.0",
+      "scope": "optional",
+      "properties": [
+        {
+          "name": "cdx:npm:package:development",
+          "value": "true"
+        }
+      ]
+    }
+  ]
+}

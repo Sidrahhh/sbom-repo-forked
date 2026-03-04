@@ -60,6 +60,7 @@ def query_osv(package_name, version, ecosystem=None):
 
         vulnerabilities.append({
             "id": vuln.get("id"),
+            "source": "OSV",
             "summary": vuln.get("summary"),
             "cvss": cvss_score,
             "has_cvss": cvss_score > 0.0  # Flag for manual review if needed
