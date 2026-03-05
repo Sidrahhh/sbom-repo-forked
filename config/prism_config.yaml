@@ -6,18 +6,14 @@
 # Risk Scoring Configuration
 risk_scoring:
   formula:
-    # Risk = (weight_vuln * vuln_count) + (weight_cvss * cvss) + (weight_reachability * reachability)
+    # Risk = (weight_vuln * vuln_count) + (weight_cvss * cvss)
     weights:
       vulnerability_count: 0.4
-      cvss_score: 0.5
-      reachability: 0.1
+      cvss_score: 0.6
 
     # Maximum vulnerability count factor (prevents score overflow)
     max_vuln_count_factor: 10.0
     vuln_count_multiplier: 2.0
-
-    # Default reachability score when confidence is low/unknown
-    default_reachability_score: 0.5
 
   # CVSS v3.1 Severity Mappings
   cvss_severity:
@@ -38,67 +34,19 @@ risk_scoring:
 
 # Vulnerability Data Sources
 vulnerability_sources:
-  # Default sources to query (comment out to disable)
+  # OSV is the primary source
   default_sources:
     - osv
-    - github
-    - kev
-    # - nvd  # Disabled by default due to rate limits
 
   # API Endpoints
   endpoints:
     osv: "https://api.osv.dev/v1/query"
-    nvd: "https://services.nvd.nist.gov/rest/json/cves/2.0"
-    github: "https://api.github.com/advisories"
-    cisa_kev: "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
 
   # Rate Limiting
   rate_limits:
-    nvd:
-      delay_seconds: 6  # NVD requires 6-second delay between requests
-      enabled: true
     osv:
       delay_seconds: 0
       enabled: false
-    github:
-      delay_seconds: 1
-      enabled: true
-
-# Reachability Analysis Configuration
-reachability:
-  # Level 1: Scope-based analysis
-  level_1:
-    enabled: true
-    scope_weights:
-      required: 1.0      # Production dependency
-      optional: 0.5      # Optional dependency
-      excluded: 0.0      # Excluded from build
-
-    dev_dependency_weight: 0.0  # Dev dependencies not reachable in production
-
-  # Level 2: Import/Call graph analysis
-  level_2:
-    enabled: true
-
-    # Import graph analysis
-    import_graph:
-      enabled: true
-      max_depth: 10  # Maximum depth to traverse
-
-    # Call graph analysis (function-level precision)
-    call_graph:
-      enabled: true
-      supported_languages:
-        - javascript
-        - python
-        - typescript
-
-      # Confidence scores
-      confidence:
-        direct_call: 1.0       # Function directly called
-        indirect_call: 0.8     # Called through wrapper
-        conditional_call: 0.6  # Called in if/try block
-        unused_import: 0.2     # Imported but never called
 
 # Policy Engine Configuration
 policy_engine:
@@ -215,8 +163,6 @@ reporting:
   markdown:
     include_emojis: true
     include_remediation: true
-    include_kev_warnings: true
-    include_reachability_details: true
     include_ai_insights: true
 
   json:

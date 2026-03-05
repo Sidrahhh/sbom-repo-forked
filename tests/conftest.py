@@ -108,52 +108,9 @@ def temp_sbom_file(tmp_path, sample_sbom):
 
 @pytest.fixture
 def temp_project_root(tmp_path):
-    """Create a temporary project structure for reachability testing"""
+    """Create a temporary project directory for pipeline and output testing"""
     project_root = tmp_path / "test_project"
     project_root.mkdir()
-
-    # Create JavaScript files
-    js_file = project_root / "index.js"
-    js_file.write_text("""
-const _ = require('lodash');
-const axios = require('axios');
-
-// Using lodash map (safe)
-const data = _.map([1, 2, 3], x => x * 2);
-
-// Using lodash template (vulnerable function)
-const template = _.template('Hello <%= user %>');
-const result = template({user: 'World'});
-
-// Using axios
-axios.get('https://api.example.com/data');
-""")
-
-    # Create Python files
-    py_file = project_root / "app.py"
-    py_file.write_text("""
-import os
-import sys
-from datetime import datetime
-
-# Using standard library only
-def main():
-    print("Hello World")
-    current_time = datetime.now()
-""")
-
-    # Create package.json
-    package_json = project_root / "package.json"
-    package_json.write_text(json.dumps({
-        "name": "test-app",
-        "version": "1.0.0",
-        "dependencies": {
-            "lodash": "4.17.20",
-            "axios": "0.21.0",
-            "express": "4.17.0"
-        }
-    }, indent=2))
-
     return project_root
 
 
@@ -207,26 +164,6 @@ def mock_osv_response():
     }
 
 
-@pytest.fixture
-def mock_github_advisory_response():
-    """Mock GitHub Advisory API response"""
-    return [
-        {
-            "ghsa_id": "GHSA-35jh-r3h4-6jhm",
-            "cve_id": "CVE-2021-23337",
-            "summary": "Prototype Pollution in lodash",
-            "description": "lodash versions before 4.17.21 are vulnerable to prototype pollution.",
-            "severity": "HIGH",
-            "cvss": {
-                "score": 7.4,
-                "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N"
-            },
-            "published_at": "2021-02-15T00:00:00Z",
-            "updated_at": "2021-02-15T00:00:00Z"
-        }
-    ]
-
-
 # ============================================================================
 # Performance Tracking Fixtures
 # ============================================================================
@@ -274,6 +211,16 @@ def metrics_collector():
                 "metric": metric_name,
                 "value": value,
                 "expected": expected,
+                "timestamp": datetime.utcnow().isoformat()
+            })
+
+        def record(self, metric_name, value):
+            """Shorthand: record a metric without a test name context"""
+            self.results.append({
+                "test_name": "general",
+                "metric": metric_name,
+                "value": value,
+                "expected": None,
                 "timestamp": datetime.utcnow().isoformat()
             })
 

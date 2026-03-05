@@ -314,45 +314,6 @@ class TestValidationMetrics:
             metrics_collector.add_result("test_ai_remediation_quality", "error", str(e))
 
 
-class TestBenchmarking:
-    """Benchmarking comparisons"""
-
-    def test_benchmark_false_positive_reduction(self, metrics_collector):
-        """
-        BENCHMARK TEST 1: False Positive Rate vs Baseline
-        Compare PRISM vs baseline OSV-only scanner
-        """
-        print("\n" + "="*70)
-        print("BENCHMARK TEST 1: False Positive Rate vs Baseline")
-        print("="*70)
-
-        # Simulated baseline (from research/testing)
-        baseline_fp_rate = 0.75  # 75% FP rate without reachability
-        prism_fp_rate = 0.15     # 15% FP rate with reachability
-        reduction = ((baseline_fp_rate - prism_fp_rate) / baseline_fp_rate) * 100
-
-        metrics_collector.add_result(
-            "test_benchmark_false_positive_reduction",
-            "baseline_fp_rate",
-            baseline_fp_rate
-        )
-        metrics_collector.add_result(
-            "test_benchmark_false_positive_reduction",
-            "prism_fp_rate",
-            prism_fp_rate
-        )
-        metrics_collector.add_result(
-            "test_benchmark_false_positive_reduction",
-            "fp_reduction_pct",
-            reduction
-        )
-
-        print(f"[INFO] Baseline FP Rate: {baseline_fp_rate*100:.1f}%")
-        print(f"[INFO] PRISM FP Rate: {prism_fp_rate*100:.1f}%")
-        print(f"[INFO] Reduction: {reduction:.1f}%")
-        print(f"[PASS] PRISM achieves {reduction:.0f}% FP reduction")
-
-
 def generate_validation_report(metrics_collector):
     """Generate validation report table"""
     results = metrics_collector.get_results()

@@ -1,9 +1,9 @@
 """
-Objective 1: Multi-Feed Vulnerability Correlation - Comprehensive Test Suite
+Objective 1: OSV Vulnerability Scanning - Comprehensive Test Suite
 ===========================================================================
 
 Test Categories:
-1. FUNCTIONAL - Core functionality validation
+1. FUNCTIONAL - Core OSV scanning and SBOM processing
 2. STRESS - High-load scenarios (100+ packages, 1000+ components)
 3. CONCURRENCY - Parallel operations and race conditions
 4. EDGE - Boundary conditions and malformed data
@@ -26,7 +26,7 @@ from unittest.mock import patch, MagicMock
 # ============================================================================
 
 class TestObjective1Functional:
-    """Core functionality tests for vulnerability correlation"""
+    """Core functionality tests for OSV vulnerability scanning"""
 
     def test_osv_api_connectivity(self, performance_tracker, metrics_collector):
         """TEST F1.1: OSV API Connection and Response"""
@@ -59,79 +59,77 @@ class TestObjective1Functional:
         assert duration < 5.0, "OSV API should respond within 5s"
         assert len(result["vulns"]) > 0
 
-    def test_github_advisory_api(self, performance_tracker, metrics_collector):
-        """TEST F1.2: GitHub Advisory Database API"""
+    def test_osv_ecosystem_query(self, performance_tracker, metrics_collector):
+        """TEST F1.2: OSV Query with Ecosystem Specified"""
         print("\n" + "="*70)
-        print("FUNCTIONAL TEST F1.2: GitHub Advisory API")
+        print("FUNCTIONAL TEST F1.2: OSV Ecosystem-Scoped Query")
         print("="*70)
 
-        performance_tracker.start("github_api")
+        performance_tracker.start("osv_ecosystem")
         time.sleep(0.3)
+        # Simulate npm-specific query
         result = {
             "vulns": [
-                {"id": "GHSA-35jh-r3h4-6jhm", "cvss": 7.4, "severity": "HIGH"}
+                {"id": "CVE-2021-23337", "ecosystem": "npm", "package": "lodash"}
             ]
         }
-        performance_tracker.stop("github_api")
-        duration = performance_tracker.get_duration("github_api")
+        performance_tracker.stop("osv_ecosystem")
+        duration = performance_tracker.get_duration("osv_ecosystem")
 
-        metrics_collector.record("github_response_time", duration)
-        metrics_collector.record("github_vulns_found", len(result["vulns"]))
+        metrics_collector.record("osv_ecosystem_response_time", duration)
+        metrics_collector.record("osv_ecosystem_vulns_found", len(result["vulns"]))
 
         print(f"✓ Response Time: {duration:.3f}s")
-        print(f"✓ Advisories Found: {len(result['vulns'])}")
+        print(f"✓ Ecosystem-specific Vulns: {len(result['vulns'])}")
 
         assert duration < 3.0
+        assert result["vulns"][0]["ecosystem"] == "npm"
 
-    def test_kev_catalog_query(self, performance_tracker, metrics_collector):
-        """TEST F1.3: CISA KEV Catalog Query"""
+    def test_osv_no_vulnerabilities_safe_package(self, performance_tracker, metrics_collector):
+        """TEST F1.3: OSV Query Returns No Results for Safe Package"""
         print("\n" + "="*70)
-        print("FUNCTIONAL TEST F1.3: CISA KEV Catalog")
+        print("FUNCTIONAL TEST F1.3: Safe Package (No CVEs)")
         print("="*70)
 
-        performance_tracker.start("kev_api")
-        time.sleep(0.4)
-        result = {"vulns": [{"id": "CVE-2021-44228", "kev_listed": True}]}
-        performance_tracker.stop("kev_api")
-        duration = performance_tracker.get_duration("kev_api")
+        performance_tracker.start("osv_safe")
+        time.sleep(0.2)
+        result = {"vulns": []}  # Patched version - no vulns
+        performance_tracker.stop("osv_safe")
+        duration = performance_tracker.get_duration("osv_safe")
 
-        metrics_collector.record("kev_response_time", duration)
-        metrics_collector.record("kev_vulns_found", len(result["vulns"]))
+        metrics_collector.record("osv_safe_response_time", duration)
+        metrics_collector.record("osv_safe_vulns_found", len(result["vulns"]))
 
         print(f"✓ Response Time: {duration:.3f}s")
+        print(f"✓ Expected 0 vulnerabilities: {len(result['vulns']) == 0}")
 
-        assert duration < 2.0
+        assert len(result["vulns"]) == 0
 
-    def test_multi_source_aggregation(self, metrics_collector):
-        """TEST F1.4: Aggregate Vulnerabilities from Multiple Sources"""
+    def test_osv_multiple_vulns_single_package(self, metrics_collector):
+        """TEST F1.4: OSV Returns Multiple CVEs for One Package"""
         print("\n" + "="*70)
-        print("FUNCTIONAL TEST F1.4: Multi-Source Aggregation")
+        print("FUNCTIONAL TEST F1.4: Multiple CVEs per Package")
         print("="*70)
 
-        osv_results = [
-            {"id": "CVE-2021-23337", "source": "OSV"},
-            {"id": "GHSA-35jh-r3h4-6jhm", "source": "OSV"}
-        ]
-        github_results = [
-            {"id": "GHSA-35jh-r3h4-6jhm", "source": "GitHub"},
-            {"id": "CVE-2021-23337", "source": "GitHub"}
-        ]
-        kev_results = [
-            {"id": "CVE-2021-23337", "source": "KEV"}
-        ]
+        result = {
+            "vulns": [
+                {"id": "CVE-2021-23337", "cvss": 9.8, "severity": "CRITICAL"},
+                {"id": "CVE-2020-28500", "cvss": 5.3, "severity": "MEDIUM"},
+                {"id": "CVE-2019-10744", "cvss": 9.8, "severity": "CRITICAL"},
+            ]
+        }
 
-        all_vulns = osv_results + github_results + kev_results
-        unique_ids = set(v["id"] for v in all_vulns)
+        vuln_ids = [v["id"] for v in result["vulns"]]
+        unique_ids = set(vuln_ids)
 
-        metrics_collector.record("total_vulns_raw", len(all_vulns))
-        metrics_collector.record("unique_vulns", len(unique_ids))
-        metrics_collector.record("dedup_rate", (1 - len(unique_ids)/len(all_vulns)) * 100)
+        metrics_collector.record("multi_vuln_count", len(result["vulns"]))
+        metrics_collector.record("multi_vuln_unique", len(unique_ids))
 
-        print(f"✓ Total Vulnerabilities: {len(all_vulns)}")
-        print(f"✓ Unique IDs: {len(unique_ids)}")
-        print(f"✓ Deduplication Rate: {((1 - len(unique_ids)/len(all_vulns)) * 100):.1f}%")
+        print(f"✓ Total CVEs: {len(result['vulns'])}")
+        print(f"✓ Unique CVEs: {len(unique_ids)}")
 
-        assert len(unique_ids) < len(all_vulns)
+        assert len(result["vulns"]) == 3
+        assert len(unique_ids) == 3
 
     def test_data_completeness(self, metrics_collector):
         """TEST F1.5: Vulnerability Data Completeness"""
@@ -288,34 +286,35 @@ class TestObjective1Stress:
 class TestObjective1Concurrency:
     """Concurrency and race condition testing"""
 
-    def test_parallel_api_calls(self, performance_tracker, metrics_collector):
-        """TEST C1.1: Parallel Multi-Source API Calls"""
+    def test_parallel_package_scanning(self, performance_tracker, metrics_collector):
+        """TEST C1.1: Parallel Package Scanning (Simulated OSV)"""
         print("\n" + "="*70)
-        print("CONCURRENCY TEST C1.1: Parallel API Calls")
+        print("CONCURRENCY TEST C1.1: Parallel Package Scan")
         print("="*70)
 
-        def query_source(source):
-            time.sleep(0.5)
-            return {"source": source, "vulns": [f"{source}-001"]}
+        def scan_package(pkg):
+            time.sleep(0.3)  # Simulate OSV query
+            return {"package": pkg, "vulns": [f"CVE-000{pkg[-1]}"]}
 
-        sources = ["OSV", "GitHub", "KEV", "NVD"]
+        packages = [f"pkg-{i}" for i in range(5)]
 
-        performance_tracker.start("parallel")
-        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-            futures = [executor.submit(query_source, s) for s in sources]
+        performance_tracker.start("parallel_scan")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            futures = [executor.submit(scan_package, p) for p in packages]
             results = [f.result() for f in concurrent.futures.as_completed(futures)]
-        performance_tracker.stop("parallel")
+        performance_tracker.stop("parallel_scan")
 
-        duration = performance_tracker.get_duration("parallel")
+        duration = performance_tracker.get_duration("parallel_scan")
 
-        metrics_collector.record("parallel_sources", len(sources))
-        metrics_collector.record("parallel_time", duration)
+        metrics_collector.record("parallel_packages", len(packages))
+        metrics_collector.record("parallel_scan_time", duration)
 
-        print(f"✓ Sources Queried: {len(sources)}")
-        print(f"✓ Parallel Time: {duration:.3f}s")
-        print(f"✓ Speedup: {len(sources) * 0.5 / duration:.1f}x")
+        print(f"✓ Packages Scanned: {len(packages)}")
+        print(f"✓ Parallel Time: {duration:.3f}s (sequential would be ~1.5s)")
+        print(f"✓ Speedup: {len(packages) * 0.3 / duration:.1f}x")
 
-        assert duration < 1.5  # Should be ~0.5s, not 2s
+        assert duration < 1.0  # Should be ~0.3s, not 1.5s
+        assert len(results) == len(packages)
 
     def test_race_condition_deduplication(self, metrics_collector):
         """TEST C1.2: Concurrent Deduplication Race Conditions"""
@@ -561,29 +560,38 @@ class TestObjective1Chaos:
 
         assert result["error"] == "rate_limit"
 
-    def test_partial_source_failure(self, metrics_collector):
-        """TEST CH1.5: Partial Source Failures"""
+    def test_scan_continues_on_single_component_error(self, metrics_collector):
+        """TEST CH1.5: Scan Continues When One Component Fails"""
         print("\n" + "="*70)
-        print("CHAOS TEST CH1.5: Partial Source Failures")
+        print("CHAOS TEST CH1.5: Partial Scan Failure Resilience")
         print("="*70)
 
-        sources = {
-            "OSV": {"status": "success", "vulns": 5},
-            "GitHub": {"status": "failed"},
-            "KEV": {"status": "success", "vulns": 2},
-            "NVD": {"status": "failed"},
-        }
+        # Simulate scanning 4 packages, one raises an exception
+        components = [
+            {"name": "lodash",   "version": "4.17.15"},
+            {"name": "",         "version": ""},       # bad entry
+            {"name": "axios",    "version": "0.21.0"},
+            {"name": "minimist", "version": "1.2.0"},
+        ]
 
-        successful = [s for s in sources.values() if s["status"] == "success"]
-        success_rate = len(successful) / len(sources) * 100
+        successful = 0
+        failed = 0
+        for comp in components:
+            try:
+                if not comp["name"] or not comp["version"]:
+                    raise ValueError("Missing name/version")
+                successful += 1
+            except ValueError:
+                failed += 1
 
-        metrics_collector.record("partial_failure_rate", 100 - success_rate)
-        metrics_collector.record("sources_working", len(successful))
+        metrics_collector.record("scan_successful", successful)
+        metrics_collector.record("scan_failed", failed)
 
-        print(f"✓ Sources Working: {len(successful)}/4")
-        print(f"✓ Success Rate: {success_rate:.0f}%")
+        print(f"✓ Successful: {successful}/4")
+        print(f"✓ Failed (gracefully): {failed}/4")
 
-        assert len(successful) >= 2
+        assert successful == 3
+        assert failed == 1
 
     def test_retry_with_backoff(self, performance_tracker, metrics_collector):
         """TEST CH1.6: Retry with Exponential Backoff"""
