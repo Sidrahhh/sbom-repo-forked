@@ -92,6 +92,7 @@ class AIRemediationAdvisor:
 
             # Parse and structure response
             advice = self._parse_ai_response(response)
+            advice = self._augment_with_basic_upgrade_fields(advice, component, vulnerabilities)
             advice["ai_generated"] = True
 
             return advice
@@ -409,6 +410,45 @@ Format your response as JSON with keys: impact_analysis, remediation_plan, risk_
             "ai_generated": False
         }
 
+    def _augment_with_basic_upgrade_fields(
+        self,
+        advice: Dict[str, Any],
+        component: Dict[str, Any],
+        vulnerabilities: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """Fill missing upgrade fields in AI output with deterministic remediation data."""
+
+        from agent.remediation_advisor import generate_remediation_advice as basic_remediation
+
+        package_name = component.get("name", "unknown")
+        current_version = component.get("version", "unknown")
+        ecosystem = self._detect_ecosystem(component)
+        reachability_info = component.get("reachability", {})
+
+        basic_advice = basic_remediation(
+            package_name=package_name,
+            current_version=current_version,
+            ecosystem=ecosystem,
+            vulnerabilities=vulnerabilities,
+            reachability_info=reachability_info
+        )
+
+        plan = advice.get("remediation_plan")
+        if not isinstance(plan, dict):
+            plan = {} if plan is None else {"steps": [str(plan)]}
+
+        if basic_advice.get("recommended_version") and not plan.get("recommended_version"):
+            plan["recommended_version"] = basic_advice["recommended_version"]
+
+        if basic_advice.get("upgrade_command") and not plan.get("upgrade_command"):
+            plan["upgrade_command"] = basic_advice["upgrade_command"]
+
+        if basic_advice.get("priority") and not plan.get("priority"):
+            plan["priority"] = basic_advice["priority"]
+
+        advice["remediation_plan"] = plan
+        return advice
+
     def _detect_ecosystem(self, component: Dict[str, Any]) -> str:
         """Detect package ecosystem"""
         purl = component.get("purl", "")
@@ -493,13 +533,13 @@ def generate_ai_remediation_summary(
                 project_root=project_root,
                 reachability_analysis=reachability
             )
-            
+
             # Track AI vs fallback usage
             if advice.get("ai_generated", False):
                 ai_count += 1
             else:
                 fallback_count += 1
-                
+
             remediations.append({
                 "component": component,
                 "advice": advice
