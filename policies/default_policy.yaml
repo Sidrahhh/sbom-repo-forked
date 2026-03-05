@@ -1,12 +1,6 @@
 # PRISM - Default Security Policy
-# Defines CVSS severity thresholds and policy gates for PR decisions.
-
-# CVSS Severity Thresholds (CVSS v3.1 standard)
-severity_thresholds:
-  critical: 9.0   # CVSS >= 9.0
-  high: 7.0       # CVSS >= 7.0
-  medium: 4.0     # CVSS >= 4.0
-  low: 0.1        # CVSS >= 0.1
+# Defines policy gates for PR decisions.
+# CVSS numeric thresholds are in config/prism_config.yaml (risk_scoring section).
 
 # Policy Gates - what severity levels trigger each PR decision
 policy_gates:
