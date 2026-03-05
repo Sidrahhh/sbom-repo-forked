@@ -36,7 +36,13 @@ class AIRemediationAdvisor:
         self.api_key = self.openai_config.get('api_key')
         if not self.api_key and self.ai_enabled:
             print("⚠️  OpenAI API key not found. Set OPENAI_API_KEY environment variable.")
+            print(f"⚠️  AI features will be disabled. Using basic remediation instead.")
             self.ai_enabled = False
+        elif self.api_key and self.ai_enabled:
+            # Mask the key for security (show only last 4 chars)
+            masked_key = f"sk-...{self.api_key[-4:]}" if len(self.api_key) > 4 else "***"
+            print(f"✓ OpenAI API key detected: {masked_key}")
+            print(f"✓ AI model: {self.openai_config.get('model', 'gpt-4')}")
 
     def generate_remediation_advice(
         self,
@@ -91,7 +97,9 @@ class AIRemediationAdvisor:
             return advice
 
         except Exception as e:
-            print(f"⚠️  AI analysis failed: {e}")
+            print(f"\n⚠️  AI analysis failed for {component.get('name', 'unknown')}: {type(e).__name__}")
+            print(f"    Error details: {str(e)}")
+            print(f"    Falling back to basic remediation...\n")
             fallback = self._fallback_remediation(component, vulnerabilities)
             fallback["ai_error"] = str(e)
             return fallback
@@ -329,6 +337,10 @@ Format your response as JSON with keys: impact_analysis, remediation_plan, risk_
             timeout=self.openai_config.get('timeout_seconds', 30)
         )
 
+        if response.status_code != 200:
+            error_detail = response.json().get('error', {}).get('message', response.text)
+            raise Exception(f"OpenAI API returned {response.status_code}: {error_detail}")
+
         response.raise_for_status()
         data = response.json()
 
@@ -466,6 +478,8 @@ def generate_ai_remediation_summary(
     """
     advisor = AIRemediationAdvisor()
     remediations = []
+    ai_count = 0
+    fallback_count = 0
 
     for finding in findings:
         component = finding.get("component", {})
@@ -479,10 +493,23 @@ def generate_ai_remediation_summary(
                 project_root=project_root,
                 reachability_analysis=reachability
             )
+            
+            # Track AI vs fallback usage
+            if advice.get("ai_generated", False):
+                ai_count += 1
+            else:
+                fallback_count += 1
+                
             remediations.append({
                 "component": component,
                 "advice": advice
             })
+
+    # Summary
+    if ai_count > 0:
+        print(f"✓ Generated {ai_count} AI-powered remediation(s)")
+    if fallback_count > 0:
+        print(f"  Generated {fallback_count} basic remediation(s)")
 
     return remediations
 
