@@ -46,7 +46,7 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          pip install requests pyyaml
+          pip install -r requirements.txt
 
       - name: Run Vulnerability Scanner
         id: vuln-scan
@@ -90,13 +90,13 @@ jobs:
           script: |
             const fs = require('fs');
             let comment = '## 🔐 PRISM Security Scan Results\n\n';
-            
+
             if (fs.existsSync('vulnscan-output/pr_comment.md')) {
               comment += fs.readFileSync('vulnscan-output/pr_comment.md', 'utf8');
             } else {
               comment += '⚠️ Scan failed to complete. Check the workflow logs.';
             }
-            
+
             // Post comment
             github.rest.issues.createComment({
               issue_number: context.issue.number,
