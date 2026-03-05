@@ -55,3 +55,4 @@ INTEGRATION-README.md
 # SBOM artifacts
 sbom.json
 *.sbom
+.prism_cache/
