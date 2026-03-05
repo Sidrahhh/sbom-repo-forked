@@ -438,6 +438,43 @@ def get_ai_remediation_advice(
     )
 
 
+def generate_ai_remediation_summary(
+    findings: List[Dict[str, Any]],
+    project_root: Optional[str] = None
+) -> List[Dict[str, Any]]:
+    """
+    Module-level function to generate AI remediation summary for all findings.
+    
+    Args:
+        findings: List of findings with components and vulnerabilities
+        project_root: Project root for code analysis
+        
+    Returns:
+        List of remediation advice dicts
+    """
+    advisor = AIRemediationAdvisor()
+    remediations = []
+    
+    for finding in findings:
+        component = finding.get("component", {})
+        vulnerabilities = finding.get("vulnerabilities", [])
+        reachability = finding.get("reachability", {})
+        
+        if vulnerabilities:
+            advice = advisor.generate_remediation_advice(
+                component,
+                vulnerabilities,
+                project_root=project_root,
+                reachability_analysis=reachability
+            )
+            remediations.append({
+                "component": component,
+                "advice": advice
+            })
+    
+    return remediations
+
+
 if __name__ == "__main__":
     # Test AI remediation
     import sys
