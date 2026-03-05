@@ -35,7 +35,7 @@ def _build_quick_fix_command(component_name, component_ecosystem, plan):
     return f"Upgrade {component_name} to {target_version}"
 
 
-def generate_markdown_report(risk_summary, findings, decision, reason, remediations=None):
+def generate_markdown_report(risk_summary, findings, decision, reason, remediations=None, rules=None):
     lines = []
     lines.append("# PRISM Security Scan Results\n")
     lines.append("*Objectives 1 & 2: SBOM Generation, OSV Scanning, AI Remediation, Policy Gates*\n")
@@ -59,11 +59,16 @@ def generate_markdown_report(risk_summary, findings, decision, reason, remediati
     # Track vulnerabilities without CVSS scores
     unknown_cvss_count = 0
 
+    blocked_names = set((rules or {}).get("blocked_packages", []))
+
     for finding in findings:
         if finding["vulnerabilities"]:
             comp = finding["component"]
 
-            lines.append(f"\n### {comp['name']}@{comp['version']}")
+            comp_header = f"{comp['name']}@{comp['version']}"
+            if comp['name'] in blocked_names:
+                comp_header += " ⛔ BLOCKED BY POLICY"
+            lines.append(f"\n### {comp_header}")
             lines.append("")  # Blank line
 
             for vuln in finding["vulnerabilities"]:

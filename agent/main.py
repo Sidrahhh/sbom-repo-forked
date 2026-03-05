@@ -69,7 +69,7 @@ def main():
     decision, reason = evaluate_policy(risk_summary, findings, rules)
 
     markdown = generate_markdown_report(
-        risk_summary, findings, decision, reason, remediations
+        risk_summary, findings, decision, reason, remediations, rules=rules
     )
 
     report_data = {
