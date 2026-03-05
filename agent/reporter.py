@@ -113,44 +113,90 @@ def generate_markdown_report(risk_summary, findings, decision, reason, remediati
 
                 # Summary
                 if advice.get("summary"):
-                    lines.append(f"**Summary:** {advice['summary']}\n")
-
+                    lines.append(f"\n**Summary:** {advice['summary']}\n")
+                
                 # Impact Analysis (AI-specific)
                 if advice.get("impact_analysis"):
-                    lines.append(f"\n**Impact Analysis:**\n{advice['impact_analysis']}\n")
-
-                # Remediation Plan (AI-specific)
+                    impact = advice['impact_analysis']
+                    lines.append(f"\n**Impact Analysis:**\n")
+                    if isinstance(impact, dict):
+                        # Format structured impact
+                        for key, value in impact.items():
+                            formatted_key = key.replace('_', ' ').title()
+                            lines.append(f"- **{formatted_key}:** {value}\n")
+                    else:
+                        lines.append(f"{impact}\n")
                 if advice.get("remediation_plan"):
                     plan = advice["remediation_plan"]
                     lines.append(f"\n**Remediation Plan:**\n")
 
                     # Check if it's a dict with detailed structure or just text
                     if isinstance(plan, dict):
+                        # Standard remediation fields
                         if plan.get("recommended_version"):
                             lines.append(f"- **Upgrade to:** {plan['recommended_version']}\n")
                         if plan.get("upgrade_command"):
                             lines.append(f"- **Command:** `{plan['upgrade_command']}`\n")
+                        if plan.get("priority"):
+                            lines.append(f"- **Priority:** {plan['priority'].upper()}\n")
+                        
+                        # Detailed steps
                         if plan.get("steps"):
-                            lines.append(f"\n**Steps:**\n")
-                            for step in plan["steps"]:
-                                lines.append(f"{step}\n")
+                            steps = plan["steps"]
+                            if isinstance(steps, list):
+                                lines.append(f"\n**Steps:**\n")
+                                for i, step in enumerate(steps, 1):
+                                    lines.append(f"{i}. {step}\n")
+                            else:
+                                lines.append(f"\n**Steps:** {steps}\n")
+                        
+                        # Breaking changes
                         if plan.get("breaking_changes"):
-                            lines.append(f"\n**Breaking Changes:**\n")
-                            for change in plan["breaking_changes"]:
-                                lines.append(f"- {change}\n")
+                            changes = plan["breaking_changes"]
+                            if isinstance(changes, list) and changes:
+                                lines.append(f"\n**Breaking Changes:**\n")
+                                for change in changes:
+                                    lines.append(f"- {change}\n")
+                            elif changes:
+                                lines.append(f"\n**Breaking Changes:** {changes}\n")
+                        
+                        # Testing strategy
                         if plan.get("testing_strategy"):
                             lines.append(f"\n**Testing Strategy:**\n{plan['testing_strategy']}\n")
-                    else:
-                        # Plain text plan
-                        lines.append(f"{plan}\n")
+                        
+                        # Migration guide (if provided)
+                        if plan.get("migration_guide"):
+                            lines.append(f"\n**Migration Guide:**\n{plan['migration_guide']}\n")
+                    lines.append(f"\n**Why This Matters:**\n")
 
-                # Risk Explanation (AI-specific)
-                if advice.get("risk_explanation"):
-                    lines.append(f"\n**Why This Matters:**\n{advice['risk_explanation']}\n")
+                    if isinstance(risk_exp, dict):
+                        # Format structured risk explanation
+                        if risk_exp.get("potential_attacks"):
+                            lines.append(f"- **Potential Attacks:** {risk_exp['potential_attacks']}\n")
+                        if risk_exp.get("why_it_matters"):
+                            lines.append(f"- **Impact:** {risk_exp['why_it_matters']}\n")
+                        if risk_exp.get("urgency_level"):
+                            lines.append(f"- **Urgency:** {risk_exp['urgency_level']}\n")
+                    else:
+                        # Plain text explanation
+                        lines.append(f"{risk_exp}\n")
 
                 # Estimated Effort
                 if advice.get("estimated_effort"):
-                    lines.append(f"\n**Estimated Effort:** {advice['estimated_effort']}\n")
+                    effort = advice['estimated_effort']
+                    lines.append(f"\n**Estimated Effort:**\n")
+
+                    if isinstance(effort, dict):
+                        # Format structured effort estimate
+                        if effort.get("time_required"):
+                            lines.append(f"- **Time Required:** {effort['time_required']}\n")
+                        if effort.get("risk_level"):
+                            lines.append(f"- **Risk Level:** {effort['risk_level']}\n")
+                        if effort.get("confidence"):
+                            lines.append(f"- **Confidence:** {effort['confidence']}\n")
+                    else:
+                        # Plain text effort
+                        lines.append(f"{effort}\n")
 
                 continue
 
