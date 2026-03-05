@@ -79,7 +79,15 @@ def main():
     print("🔍 Analyzing component reachability...")
     if args.project_root:
         print(f"   Project root: {args.project_root}")
-    reachability_data = analyze_all_components(sbom_json, project_root=args.project_root)
+        print("   Level 2 (code-based) analysis: ENABLED")
+    else:
+        print("   Level 1 (metadata-based) analysis only")
+
+    reachability_data = analyze_all_components(
+        sbom_json,
+        project_root=args.project_root,
+        enable_level_2=(args.project_root is not None)
+    )
 
     findings = []
 

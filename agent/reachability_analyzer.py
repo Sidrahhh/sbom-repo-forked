@@ -197,12 +197,18 @@ def calculate_reachability_score(reachability_result: Dict[str, Any]) -> float:
             return 0.5  # Unknown/low confidence - assume moderately reachable
 
 
-def analyze_all_components(sbom_data: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+def analyze_all_components(
+    sbom_data: Dict[str, Any],
+    project_root: Optional[str] = None,
+    enable_level_2: bool = True
+) -> Dict[str, Dict[str, Any]]:
     """
     Analyze reachability for all components in SBOM.
 
     Args:
         sbom_data: Full SBOM JSON
+        project_root: Path to project root for Level 2 analysis
+        enable_level_2: Enable code-based reachability analysis
 
     Returns:
         Dict mapping component key (name@version) to reachability result
@@ -216,7 +222,12 @@ def analyze_all_components(sbom_data: Dict[str, Any]) -> Dict[str, Dict[str, Any
         version = component.get("version", "unknown")
         key = f"{name}@{version}"
 
-        results[key] = analyze_reachability(component, sbom_data)
+        results[key] = analyze_reachability(
+            component,
+            sbom_data,
+            project_root=project_root,
+            enable_level_2=enable_level_2
+        )
 
     return results
 
