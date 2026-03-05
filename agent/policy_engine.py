@@ -1,6 +1,9 @@
 import yaml
 import re
+from pathlib import Path
 from agent.config_loader import get_config
+
+_PROJECT_ROOT = Path(__file__).parent.parent
 
 
 def load_rules(rules_path=None):
@@ -146,6 +149,17 @@ def evaluate_advanced_rules(risk_summary: dict, findings: list, rules: dict) -> 
     return None, None
 
 
+def load_policy(policy_path=None):
+    """Load policy gates from policies/default_policy.yaml (or a custom path)"""
+    if policy_path is None:
+        policy_path = _PROJECT_ROOT / "policies" / "default_policy.yaml"
+    try:
+        with open(policy_path, "r") as f:
+            return yaml.safe_load(f)
+    except Exception:
+        return None
+
+
 def evaluate_policy(risk_summary, findings, rules=None):
     """
     Evaluate security policy based on findings and configured rules.
@@ -175,14 +189,14 @@ def evaluate_policy(risk_summary, findings, rules=None):
     severity = risk_summary["overall_severity"]
     total_vulns = risk_summary.get("total_vulnerabilities", 0)
 
-    # Get policy gates from rules or use defaults
+    # Get policy gates: rules file → policies/default_policy.yaml → hardcoded defaults
     if rules and "policy_gates" in rules:
-        fail_on = rules["policy_gates"].get("fail_on", ["CRITICAL", "HIGH"])
-        warn_on = rules["policy_gates"].get("warn_on", ["MEDIUM"])
+        gates = rules["policy_gates"]
     else:
-        # Default behavior: FAIL on CRITICAL/HIGH, WARN on MEDIUM
-        fail_on = ["CRITICAL", "HIGH"]
-        warn_on = ["MEDIUM"]
+        policy = load_policy()
+        gates = policy.get("policy_gates", {}) if policy else {}
+    fail_on = gates.get("fail_on", ["CRITICAL", "HIGH"])
+    warn_on = gates.get("warn_on", ["MEDIUM"])
 
     if severity in fail_on:
         return "FAIL", f"Severity threshold exceeded: {severity} vulnerabilities found ({total_vulns} total)"

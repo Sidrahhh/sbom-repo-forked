@@ -1,29 +1,5 @@
-# PRISM Security Policy Configuration
+# PRISM - Blocked Packages List
+# Packages listed here will always trigger a FAIL decision, regardless of CVSS score.
 
-# Packages that are explicitly blocked from use
 blocked_packages:
   - openssl
-
-# CVSS Severity Thresholds (CVSS v3.1 standard)
-# You can customize these values per project requirements
-severity_thresholds:
-  critical: 9.0   # CVSS >= 9.0
-  high: 7.0       # CVSS >= 7.0
-  medium: 4.0     # CVSS >= 4.0
-  low: 0.1        # CVSS >= 0.1
-
-# Policy Gates - What severity levels trigger FAIL/WARN/PASS
-policy_gates:
-  # Fail the PR if these severity levels are found
-  fail_on:
-    - CRITICAL
-    - HIGH
-
-  # Warn but allow merge for these severity levels
-  warn_on:
-    - MEDIUM
-
-  # Allow these severity levels
-  allow:
-    - LOW
-    - UNKNOWN
