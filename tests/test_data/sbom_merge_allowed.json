@@ -1,0 +1,45 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-03-05T10:00:00Z",
+    "component": {
+      "name": "test-app-safe",
+      "version": "1.0.0",
+      "type": "application"
+    }
+  },
+  "components": [
+    {
+      "name": "axios",
+      "version": "0.21.0",
+      "description": "Has vulnerabilities but NOT imported in code",
+      "scope": "required",
+      "type": "library",
+      "purl": "pkg:npm/axios@0.21.0"
+    },
+    {
+      "name": "express",
+      "version": "4.18.0",
+      "description": "Safe and actually used",
+      "scope": "required",
+      "type": "library",
+      "purl": "pkg:npm/express@4.18.0"
+    },
+    {
+      "name": "webpack",
+      "version": "5.0.0",
+      "description": "Dev dependency - not in production",
+      "scope": "optional",
+      "type": "build-tool",
+      "purl": "pkg:npm/webpack@5.0.0",
+      "properties": [
+        {
+          "name": "cdx:npm:package:development",
+          "value": "true"
+        }
+      ]
+    }
+  ]
+}

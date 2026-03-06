@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/glob-parent@3.1.0",
+      "name": "glob-parent",
+      "version": "3.1.0"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/express@4.21.2",
+      "name": "express",
+      "version": "4.21.2"
+    },
+    {
+      "type": "library",
+      "purl": "pkg:npm/axios@1.6.0",
+      "name": "axios",
+      "version": "1.6.0"
+    },
+    {
+      "type": "library",
+      "purl": "pkg:npm/chalk@5.3.0",
+      "name": "chalk",
+      "version": "5.3.0"
+    },
+    {
+      "type": "library",
+      "purl": "pkg:npm/uuid@9.0.0",
+      "name": "uuid",
+      "version": "9.0.0"
+    }
+  ]
+}

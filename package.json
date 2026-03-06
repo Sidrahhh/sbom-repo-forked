@@ -1,11 +1,8 @@
 {
-  "name": "sbom-test",
-  "version": "0.1.0",
-  "license": "MIT",
+  "name": "demo-vulnerable-app",
+  "version": "1.0.0",
+  "description": "Demo app with vulnerable dependencies for PRISM testing",
   "dependencies": {
-    "left-pad": "1.3.0"
-  },
-  "scripts": {
-    "test": "node -e \"console.log('ok')\""
+    "lodash": "4.17.20"
   }
 }

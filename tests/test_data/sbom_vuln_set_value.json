@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/set-value@2.0.0",
+      "name": "set-value",
+      "version": "2.0.0"
+    }
+  ]
+}

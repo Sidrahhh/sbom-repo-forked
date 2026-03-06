@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/minimist@1.2.0",
+      "name": "minimist",
+      "version": "1.2.0"
+    }
+  ]
+}

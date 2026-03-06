@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/jquery@1.9.0",
+      "name": "jquery",
+      "version": "1.9.0"
+    }
+  ]
+}

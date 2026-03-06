@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/underscore@1.12.0",
+      "name": "underscore",
+      "version": "1.12.0"
+    }
+  ]
+}

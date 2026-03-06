@@ -1,0 +1,24 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/typescript@5.4.0",
+      "name": "typescript",
+      "version": "5.4.0"
+    },
+    {
+      "type": "library",
+      "purl": "pkg:npm/uuid@9.0.0",
+      "name": "uuid",
+      "version": "9.0.0"
+    },
+    {
+      "type": "library",
+      "purl": "pkg:npm/dotenv@16.3.1",
+      "name": "dotenv",
+      "version": "16.3.1"
+    }
+  ]
+}

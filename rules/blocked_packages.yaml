@@ -1,0 +1,5 @@
+# PRISM - Blocked Packages List
+# Packages listed here will always trigger a FAIL decision, regardless of CVSS score.
+
+blocked_packages:
+  - openssl

@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/node-fetch@2.6.0",
+      "name": "node-fetch",
+      "version": "2.6.0"
+    }
+  ]
+}

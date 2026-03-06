@@ -1,0 +1,177 @@
+# ============================================================================
+# PRISM Configuration File
+# Pull-Request Integrated Security Mechanism
+# ============================================================================
+
+# Risk Scoring Configuration
+risk_scoring:
+  formula:
+    # Risk = (weight_vuln * vuln_count) + (weight_cvss * cvss)
+    weights:
+      vulnerability_count: 0.4
+      cvss_score: 0.6
+
+    # Maximum vulnerability count factor (prevents score overflow)
+    max_vuln_count_factor: 10.0
+    vuln_count_multiplier: 2.0
+
+  # CVSS v3.1 Severity Mappings
+  cvss_severity:
+    critical:
+      threshold: 9.0
+      numeric_value: 9.5
+    high:
+      threshold: 7.0
+      numeric_value: 7.5
+    medium:
+      threshold: 4.0
+      numeric_value: 5.0
+    low:
+      threshold: 0.1
+      numeric_value: 2.5
+    unknown:
+      numeric_value: 0.0
+
+# Vulnerability Data Sources
+vulnerability_sources:
+  # OSV is the primary source
+  default_sources:
+    - osv
+
+  # API Endpoints
+  endpoints:
+    osv: "https://api.osv.dev/v1/query"
+
+  # Rate Limiting
+  rate_limits:
+    osv:
+      delay_seconds: 0
+      enabled: false
+
+# Policy Engine Configuration
+policy_engine:
+  # Python-based policy engine
+  python:
+    rules_file: "rules/blocked_packages.yaml"
+
+# Remediation Configuration
+remediation:
+  # Priority thresholds
+  priority:
+    critical: 9.0
+    high: 7.0
+    medium: 4.0
+    low: 0.1
+
+  # Breaking change detection
+  breaking_changes:
+    major_version: "high_risk"
+    minor_version: "medium_risk"
+    patch_version: "low_risk"
+
+  # Ecosystem-specific package managers
+  package_managers:
+    npm: "npm install"
+    pip: "pip install"
+    maven: "mvn dependency:update"
+    go: "go get -u"
+    cargo: "cargo update"
+    nuget: "dotnet add package"
+
+# AI/LLM Configuration
+ai:
+  enabled: true
+
+  # OpenAI Configuration
+  openai:
+    model: "gpt-4"
+    api_key_env: "OPENAI_API_KEY"  # Read from environment variable
+    temperature: 0.3  # Lower = more deterministic
+    max_tokens: 2000
+    timeout_seconds: 30
+
+  # Features
+  features:
+    context_aware_remediation: true
+    changelog_analysis: true
+    breaking_change_prediction: true
+    natural_language_explanations: true
+    code_analysis: true
+    learning_from_feedback: false  # Future: learn from accepted/rejected PRs
+
+  # Code context gathering
+  code_context:
+    max_files_to_analyze: 50
+    file_size_limit_kb: 500
+    include_patterns:
+      - "**/*.js"
+      - "**/*.ts"
+      - "**/*.py"
+      - "**/*.java"
+      - "**/package.json"
+      - "**/requirements.txt"
+      - "**/pom.xml"
+    exclude_patterns:
+      - "**/node_modules/**"
+      - "**/dist/**"
+      - "**/build/**"
+      - "**/.git/**"
+
+# Multi-Agent System Configuration (DISABLED by default)
+multi_agent:
+  enabled: false  # Set to true or use --multi-agent flag to enable
+  orchestrator: "openai"  # Main coordinator
+
+  agents:
+    vulnerability_analyzer:
+      enabled: true
+      responsibilities:
+        - "Query vulnerability databases"
+        - "Correlate findings across sources"
+        - "Assess CVSS scores and KEV status"
+
+    code_context_analyzer:
+      enabled: true
+      responsibilities:
+        - "Analyze actual code usage"
+        - "Build import/call graphs"
+        - "Determine reachability"
+
+    remediation_planner:
+      enabled: true
+      responsibilities:
+        - "Generate fix suggestions"
+        - "Analyze changelogs"
+        - "Predict breaking changes"
+        - "Create migration guides"
+
+    pr_creator:
+      enabled: false  # Future: autonomous PR creation
+      responsibilities:
+        - "Create pull requests"
+        - "Write PR descriptions"
+        - "Add test recommendations"
+
+# Reporting Configuration
+reporting:
+  formats:
+    - markdown
+    - json
+
+  output_directory: "output"
+
+  markdown:
+    include_emojis: true
+    include_remediation: true
+    include_ai_insights: true
+
+  json:
+    pretty_print: true
+    include_raw_vulnerabilities: true
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARN, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "prism.log"
+  console: true

@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/handlebars@4.5.2",
+      "name": "handlebars",
+      "version": "4.5.2"
+    }
+  ]
+}

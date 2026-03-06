@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/typescript@5.4.0",
+      "name": "typescript",
+      "version": "5.4.0"
+    }
+  ]
+}

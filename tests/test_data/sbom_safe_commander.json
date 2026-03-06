@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/commander@11.0.0",
+      "name": "commander",
+      "version": "11.0.0"
+    }
+  ]
+}

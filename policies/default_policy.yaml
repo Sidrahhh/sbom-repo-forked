@@ -1,0 +1,19 @@
+# PRISM - Default Security Policy
+# Defines policy gates for PR decisions.
+# CVSS numeric thresholds are in config/prism_config.yaml (risk_scoring section).
+
+# Policy Gates - what severity levels trigger each PR decision
+policy_gates:
+  # Fail the PR if any of these severity levels are found
+  fail_on:
+    - CRITICAL
+    - HIGH
+
+  # Warn but allow merge for these severity levels
+  warn_on:
+    - MEDIUM
+
+  # Allow (PASS) for these severity levels
+  allow:
+    - LOW
+    - UNKNOWN

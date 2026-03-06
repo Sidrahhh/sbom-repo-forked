@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/marked@0.3.6",
+      "name": "marked",
+      "version": "0.3.6"
+    }
+  ]
+}

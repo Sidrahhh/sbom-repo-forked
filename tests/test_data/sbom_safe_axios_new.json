@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/axios@1.6.0",
+      "name": "axios",
+      "version": "1.6.0"
+    }
+  ]
+}

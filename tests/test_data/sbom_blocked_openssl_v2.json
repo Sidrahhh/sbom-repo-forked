@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/openssl@2.0.0",
+      "name": "openssl",
+      "version": "2.0.0"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/lodash@4.17.20",
+      "name": "lodash",
+      "version": "4.17.20"
+    },
+    {
+      "type": "library",
+      "purl": "pkg:npm/axios@0.21.0",
+      "name": "axios",
+      "version": "0.21.0"
+    }
+  ]
+}

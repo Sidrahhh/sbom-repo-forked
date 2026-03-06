@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/ansi-regex@4.1.0",
+      "name": "ansi-regex",
+      "version": "4.1.0"
+    }
+  ]
+}

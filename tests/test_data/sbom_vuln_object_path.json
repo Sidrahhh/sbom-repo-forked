@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/object-path@0.11.4",
+      "name": "object-path",
+      "version": "0.11.4"
+    }
+  ]
+}

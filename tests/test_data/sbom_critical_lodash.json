@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "purl": "pkg:npm/lodash@4.17.15",
+      "name": "lodash",
+      "version": "4.17.15"
+    }
+  ]
+}
