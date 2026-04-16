@@ -33,7 +33,7 @@ def find_dependency_line_in_diff(diff_content: str, package_name: str, current_v
         Line position (1-indexed) or None if not found
     """
     lines = diff_content.split('\n')
-    position = 0
+    position = -1
     
     for line in lines:
         position += 1
