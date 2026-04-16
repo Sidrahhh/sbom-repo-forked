@@ -70,6 +70,25 @@ def generate_markdown_report(risk_summary, findings, decision, reason, remediati
                 comp_header += " ⛔ BLOCKED BY POLICY"
             lines.append(f"\n### {comp_header}")
             lines.append("")  # Blank line
+            
+            # Check if there are alternative packages to suggest
+            alternatives = comp.get('alternative_packages', [])
+            if alternatives:
+                lines.append("💡 **Alternative packages to consider:**")
+                if isinstance(alternatives, list):
+                    for alt in alternatives:
+                        if isinstance(alt, dict):
+                            alt_name = alt.get('name', 'Unknown')
+                            alt_reason = alt.get('reason', '')
+                            if alt_reason:
+                                lines.append(f"- **{alt_name}** — {alt_reason}")
+                            else:
+                                lines.append(f"- **{alt_name}**")
+                        else:
+                            lines.append(f"- {alt}")
+                else:
+                    lines.append(f"> {alternatives}")
+                lines.append("")  # Blank line
 
             for vuln in finding["vulnerabilities"]:
                 cvss = vuln.get('cvss', 0.0)
@@ -120,6 +139,25 @@ def generate_markdown_report(risk_summary, findings, decision, reason, remediati
                     lines.append(f"\n### 🤖 AI-Powered Remediation for {comp_name}@{comp_version}\n")
                 else:
                     lines.append(f"\n### {comp_name}@{comp_version}\n")
+                
+                # Show alternative packages if available
+                alternatives = advice.get("alternative_packages", [])
+                if alternatives:
+                    lines.append(f"\n**Alternative packages to consider:**\n")
+                    if isinstance(alternatives, list):
+                        for alt in alternatives:
+                            if isinstance(alt, dict):
+                                alt_name = alt.get('name', 'Unknown')
+                                alt_reason = alt.get('reason', '')
+                                if alt_reason:
+                                    lines.append(f"- **{alt_name}** — {alt_reason}\n")
+                                else:
+                                    lines.append(f"- **{alt_name}**\n")
+                            else:
+                                lines.append(f"- {alt}\n")
+                    else:
+                        lines.append(f"{alternatives}\n")
+                    lines.append("")  # Blank line
 
                 # Summary
                 if advice.get("summary"):

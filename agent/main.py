@@ -63,6 +63,18 @@ def main():
     else:
         remediations = generate_remediation_summary(findings)
 
+    # Propagate alternative packages from remediations back to findings for inline display
+    for remediation in remediations:
+        advice = remediation.get("advice", {})
+        alternatives = advice.get("alternative_packages", [])
+        if alternatives:
+            # Find matching finding and add alternatives to component
+            comp_name = remediation.get("component", {}).get("name")
+            for finding in findings:
+                if finding.get("component", {}).get("name") == comp_name:
+                    finding["component"]["alternative_packages"] = alternatives
+                    break
+
     rules = load_rules(args.rules)
 
     # Use Python-based policy evaluation (OPA removed)

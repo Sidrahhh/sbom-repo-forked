@@ -300,8 +300,13 @@ Provide comprehensive, actionable remediation advice in the following format:
    - Risk level: Low/Medium/High
    - Confidence: % (based on availability of changelog/migration guides)
 
+5. ALTERNATIVE PACKAGES (optional but appreciated)
+   - List 1-2 well-maintained alternative packages that provide similar functionality
+   - Include reasoning for each alternative
+   - Note if migrating would require significant code changes
+
 Be specific to the code context provided. If the package isn't directly used, mention that this might be a transitive dependency.
-Format your response as JSON with keys: impact_analysis, remediation_plan, risk_explanation, estimated_effort"""
+Format your response as JSON with keys: impact_analysis, remediation_plan, risk_explanation, estimated_effort, alternative_packages"""
 
         return prompt
 
