@@ -240,7 +240,7 @@ jobs:
             console.log(`⚠️ Overall Severity: ${decision.overall_severity}`);
             console.log(`📈 Total Vulnerabilities: ${decision.total_vulnerabilities}`);
             
-            // If decision is FAIL, post a blocking review
+            // If decision is FAIL, post a blocking review and FAIL the workflow
             if (decisionStatus === 'FAIL') {
               console.log('\n🔒 FAIL decision detected - blocking PR merge...');
               
@@ -284,6 +284,10 @@ jobs:
                 console.error('❌ Failed to post blocking review:', error.message);
                 throw error;
               }
+              
+              // Fail the workflow to prevent merge
+              core.setFailed(`🔒 PRISM Security Scan FAILED: ${decision.reason}`);
+              process.exit(1);
             } else {
               console.log(`✅ Decision is ${decisionStatus} - PR merge allowed`);
             }
