@@ -218,6 +218,70 @@ jobs:
               // Don't fail the workflow, just warn
             }
 
+      - name: Dismiss Stale Security Reviews on PASS
+        if: always() && github.event.pull_request.number
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            
+            // Read the decision status
+            if (!fs.existsSync('vulnscan-output/decision.json')) {
+              console.log('ℹ️ No decision.json found - skipping review dismissal check');
+              process.exit(0);
+            }
+            
+            const decision = JSON.parse(fs.readFileSync('vulnscan-output/decision.json', 'utf8'));
+            const decisionStatus = decision.decision || 'UNKNOWN';
+            
+            // Only dismiss reviews if decision is PASS
+            if (decisionStatus === 'PASS') {
+              console.log('✅ PASS decision detected - dismissing stale security reviews...');
+              
+              try {
+                // Get all reviews on this PR
+                const { data: reviews } = await github.rest.pulls.listReviews({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.issue.number
+                });
+                
+                console.log(`📋 Found ${reviews.length} total reviews on PR`);
+                
+                // Filter for PRISM security reviews that requested changes
+                const prismReviews = reviews.filter(review => 
+                  (review.state === 'CHANGES_REQUESTED' || review.state === 'PENDING') &&
+                  (review.body && review.body.includes('PRISM'))
+                );
+                
+                console.log(`🔍 Found ${prismReviews.length} PRISM security reviews to dismiss`);
+                
+                // Dismiss each stale review
+                for (const review of prismReviews) {
+                  try {
+                    await github.rest.pulls.dismissReview({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      pull_number: context.issue.number,
+                      review_id: review.id,
+                      message: '✅ Security issues resolved - vulnerabilities fixed in this update. This review is being dismissed as the PR now meets security requirements.'
+                    });
+                    console.log(`✅ Dismissed review #${review.id} from ${review.user.login}`);
+                  } catch (error) {
+                    console.warn(`⚠️ Could not dismiss review #${review.id}:`, error.message);
+                  }
+                }
+                
+                console.log('✅ Stale review dismissal complete');
+              } catch (error) {
+                console.warn('⚠️ Error dismissing reviews:', error.message);
+                // Don't fail the workflow, just warn
+              }
+            } else {
+              console.log(`ℹ️ Decision is ${decisionStatus} - skipping review dismissal`);
+            }
+
       - name: Block PR Merge on FAIL Decision
         if: always() && github.event.pull_request.number
         uses: actions/github-script@v7
