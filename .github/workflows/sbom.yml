@@ -92,7 +92,7 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-            
+
             // Read the main report
             let comment = '## 🔐 PRISM Security Scan Results\n\n';
             if (fs.existsSync('vulnscan-output/pr_comment.md')) {
@@ -114,7 +114,7 @@ jobs:
               if (fs.existsSync('vulnscan-output/report.json')) {
                 const report = JSON.parse(fs.readFileSync('vulnscan-output/report.json', 'utf8'));
                 const remediations = report.remediations || [];
-                
+
                 if (remediations.length === 0) {
                   console.log('ℹ️ No remediations to suggest');
                   process.exit(0);
@@ -134,12 +134,12 @@ jobs:
                   const component = remediation.component || {};
                   const componentName = component.name;
                   const currentVersion = component.version;
-                  
+
                   // Handle both direct fields and nested remediation_plan fields
                   const remediationPlan = advice.remediation_plan || {};
                   const recommendedVersion = advice.recommended_version || remediationPlan.recommended_version;
                   const upgradeCommand = advice.upgrade_command || remediationPlan.upgrade_command;
-                  
+
                   if (!componentName || !recommendedVersion) {
                     console.log(`⏭️ Skipping ${componentName} - no recommended version available`);
                     continue;
@@ -159,20 +159,20 @@ jobs:
                   // Parse the patch to find dependencies
                   const patch = changedFile.patch || '';
                   const lines = patch.split('\n');
-                  
+
                   let position = 0;
                   for (const line of lines) {
                     // Skip @@ header lines - don't count them in position
                     if (line.startsWith('@@')) continue;
-                    
+
                     position++;
-                    
+
                     // Skip removed lines but count them in position
                     if (line.startsWith('-')) continue;
-                    
+
                     // Look for the package in the line
                     if (componentName && line.includes(componentName) && line.includes(currentVersion)) {
-                      const upgradeCmd = upgradeCommand || 
+                      const upgradeCmd = upgradeCommand ||
                         (ecosystem === 'npm' ? `npm install ${componentName}@${recommendedVersion}` :
                          ecosystem.includes('pypi') ? `pip install ${componentName}==${recommendedVersion}` :
                          `Upgrade ${componentName} to ${recommendedVersion}`);
@@ -192,7 +192,7 @@ jobs:
                         position: position,
                         body: fixComment
                       });
-                      
+
                       console.log(`📝 Added inline suggestion for ${componentName} at position ${position}`);
                       break; // Move to next remediation
                     }
@@ -202,7 +202,7 @@ jobs:
                 // Post review if we have comments
                 if (reviewComments.length > 0) {
                   console.log(`📤 Posting ${reviewComments.length} inline fix suggestions...`);
-                  
+
                   await github.rest.pulls.createReview({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
@@ -212,7 +212,7 @@ jobs:
                     body: '💡 Inline vulnerability fixes suggested below',
                     comments: reviewComments
                   });
-                  
+
                   console.log('✅ Inline suggestions posted successfully');
                 } else {
                   console.log('ℹ️ No vulnerable dependencies found in changed files');
@@ -230,20 +230,20 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            
+
             // Read the decision status
             if (!fs.existsSync('vulnscan-output/decision.json')) {
               console.log('ℹ️ No decision.json found - skipping review dismissal check');
               process.exit(0);
             }
-            
+
             const decision = JSON.parse(fs.readFileSync('vulnscan-output/decision.json', 'utf8'));
             const decisionStatus = decision.decision || 'UNKNOWN';
-            
+
             // Only dismiss reviews if decision is PASS
             if (decisionStatus === 'PASS') {
               console.log('✅ PASS decision detected - dismissing stale security reviews...');
-              
+
               try {
                 // Get all reviews on this PR
                 const { data: reviews } = await github.rest.pulls.listReviews({
@@ -251,17 +251,17 @@ jobs:
                   repo: context.repo.repo,
                   pull_number: context.issue.number
                 });
-                
+
                 console.log(`📋 Found ${reviews.length} total reviews on PR`);
-                
+
                 // Filter for PRISM security reviews that requested changes
-                const prismReviews = reviews.filter(review => 
+                const prismReviews = reviews.filter(review =>
                   (review.state === 'CHANGES_REQUESTED' || review.state === 'PENDING') &&
                   (review.body && review.body.includes('PRISM'))
                 );
-                
+
                 console.log(`🔍 Found ${prismReviews.length} PRISM security reviews to dismiss`);
-                
+
                 // Dismiss each stale review
                 for (const review of prismReviews) {
                   try {
@@ -277,7 +277,7 @@ jobs:
                     console.warn(`⚠️ Could not dismiss review #${review.id}:`, error.message);
                   }
                 }
-                
+
                 console.log('✅ Stale review dismissal complete');
               } catch (error) {
                 console.warn('⚠️ Error dismissing reviews:', error.message);
@@ -294,25 +294,25 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            
+
             // Read the decision status
             if (!fs.existsSync('vulnscan-output/decision.json')) {
               console.log('ℹ️ No decision.json found - skipping merge block check');
               process.exit(0);
             }
-            
+
             const decision = JSON.parse(fs.readFileSync('vulnscan-output/decision.json', 'utf8'));
             const decisionStatus = decision.decision || 'UNKNOWN';
-            
+
             console.log(`📊 Security Decision: ${decisionStatus}`);
             console.log(`📋 Reason: ${decision.reason}`);
             console.log(`⚠️ Overall Severity: ${decision.overall_severity}`);
             console.log(`📈 Total Vulnerabilities: ${decision.total_vulnerabilities}`);
-            
+
             // If decision is FAIL, post a blocking review and FAIL the workflow
             if (decisionStatus === 'FAIL') {
               console.log('\n🔒 FAIL decision detected - blocking PR merge...');
-              
+
               // Build blocking review message
               let blockMessage = '🔒 **PRISM Security Scan: MERGE BLOCKED**\n\n';
               blockMessage += `**Decision:** ❌ FAIL\n\n`;
@@ -320,7 +320,7 @@ jobs:
               blockMessage += `**Risk Summary:**\n`;
               blockMessage += `- Overall Severity: **${decision.overall_severity}**\n`;
               blockMessage += `- Total Vulnerabilities: ${decision.total_vulnerabilities}\n`;
-              
+
               if (decision.critical_vulnerabilities > 0) {
                 blockMessage += `- ⛔ Critical Issues: ${decision.critical_vulnerabilities}\n`;
               }
@@ -330,14 +330,14 @@ jobs:
               if (decision.reachable_vulnerabilities > 0) {
                 blockMessage += `- 🟠 Reachable Vulnerabilities: ${decision.reachable_vulnerabilities}\n`;
               }
-              
+
               blockMessage += `\n**Action Required:**\n`;
               blockMessage += `1. Review all vulnerability findings in the main PR comment\n`;
               blockMessage += `2. Apply recommended security fixes or remediations\n`;
               blockMessage += `3. Ensure all critical vulnerabilities are resolved\n`;
               blockMessage += `4. Push changes to trigger a new security scan\n\n`;
               blockMessage += `⚠️ **This PR cannot be merged until security issues are resolved.**`;
-              
+
               // Post blocking review
               try {
                 await github.rest.pulls.createReview({
@@ -353,7 +353,7 @@ jobs:
                 console.error('❌ Failed to post blocking review:', error.message);
                 throw error;
               }
-              
+
               // Fail the workflow to prevent merge
               core.setFailed(`🔒 PRISM Security Scan FAILED: ${decision.reason}`);
               process.exit(1);
