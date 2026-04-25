@@ -98,34 +98,6 @@ jobs:
             const fs = require('fs');
             const path = require('path');
 
-            // First, delete any existing PRISM reviews to avoid duplicates
-            try {
-              const { data: existingReviews } = await github.rest.pulls.listReviews({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.issue.number
-              });
-
-              for (const review of existingReviews) {
-                if (review.user.login === 'github-actions[bot]' && 
-                    review.body?.includes('PRISM')) {
-                  console.log(`🗑️ Removing previous PRISM review #${review.id} to avoid duplicates`);
-                  try {
-                    await github.rest.pulls.deleteReview({
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      pull_number: context.issue.number,
-                      review_id: review.id
-                    });
-                  } catch (err) {
-                    console.warn(`⚠️ Could not delete review #${review.id}:`, err.message);
-                  }
-                }
-              }
-            } catch (err) {
-              console.warn('⚠️ Could not fetch existing reviews:', err.message);
-            }
-
             // Read the main report
             let comment = '## 🔐 PRISM Security Scan Results\n\n';
             if (fs.existsSync('vulnscan-output/pr_comment.md')) {
